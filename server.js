@@ -62,4 +62,9 @@ function byThree(req, res, next) {
   }
 }
 
+//catchall net for API errors! 
+server.use((error, req, res, next) => {
+  res.status(400).json({message: "Bad Panda!", error})
+})
+
 module.exports = server;

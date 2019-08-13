@@ -70,7 +70,7 @@ router.delete("/:id", validateId, (req, res) => {
     });
 });
 
-router.put("/:id", validateId, (req, res) => {
+router.put("/:id", [validateId, requiredBody], (req, res) => {
   Hubs.update(req.params.id, req.body)
     .then(hub => {
         res.status(200).json(hub);
@@ -101,7 +101,7 @@ router.get("/:id/messages", validateId, (req, res) => {
 });
 
 // add an endpoint for adding new message to a hub
-router.post("/:id/messages", validateId, (req, res) => {
+router.post("/:id/messages", [validateId, requiredBody], (req, res, next) => {
   const messageInfo = { ...req.body, hub_id: req.params.id };
 
   Messages.add(messageInfo)
@@ -111,9 +111,9 @@ router.post("/:id/messages", validateId, (req, res) => {
     .catch(error => {
       // log error to server
       console.log(error);
-      res.status(500).json({
+      next( {
         message: "Error getting the messages for the hub"
-      });
+      })
     });
 });
 
@@ -135,6 +135,16 @@ function validateId(req, res, next) {
         message: "Error processing request"
       });
     });
+}
+
+function requiredBody(req, res, next) {
+
+
+  if (req.body && Object.keys(req.body).length > 0) {
+    next()
+  } else {
+    next({message: 'Bad request'})
+  }
 }
 
 module.exports = router;
